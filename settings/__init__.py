@@ -80,7 +80,10 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.admin',
+    'core',
 	'apps.accounts', 
+    'apps.files',
+    'apps.pages',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

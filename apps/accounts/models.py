@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.db.models import signals
 
+from core.models import Accountable
 
 class Account(models.Model):
     site = models.ForeignKey(Site, verbose_name=_("Site"), max_length=50, unique=True)
@@ -17,9 +18,7 @@ class Account(models.Model):
         return self.site.domain
     
 
-class AccountUserPermission(models.Model):
-    account =models.ForeignKey(Account)
-    user = models.ForeignKey(User)
+class AccountUserPermission(Accountable):
     permissions = models.ManyToManyField(Permission, related_name="account_permission")
     
     def __unicode__(self):
