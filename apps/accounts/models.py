@@ -2,10 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import Permission
-
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
-from django.db.models import signals
+
+from core.models import Accountable
 
 
 class Account(models.Model):
@@ -17,10 +17,12 @@ class Account(models.Model):
         return self.site.domain
     
 
-class AccountUserPermission(models.Model):
-    account =models.ForeignKey(Account)
-    user = models.ForeignKey(User)
+class AccountUserPermission(Accountable):
     permissions = models.ManyToManyField(Permission, related_name="account_permission")
+
+    class Meta:
+        verbose_name = _('permission')
+        verbose_name_plural = _('permissions')
     
     def __unicode__(self):
         return "%s | %s" % (self.account.site, self.user.username)

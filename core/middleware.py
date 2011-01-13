@@ -5,7 +5,7 @@ class SubdomainMiddleware:
     """ Make the subdomain publicly available to classes """
     
     def process_request(self, request):
-        domain = request.get_host()
+        domain = request.get_host().split(':')[0] # no port
         try:
             request.account = Account.objects.get(site__domain__iexact=domain)
         except Account.DoesNotExist:

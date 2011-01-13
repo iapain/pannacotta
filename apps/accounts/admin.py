@@ -1,11 +1,13 @@
 from django.contrib import admin
-from models import Account, AccountUserPermission
 from django.contrib.auth.models import Permission
 from django.contrib.admin import widgets
 
+from apps.accounts.models import Account, AccountUserPermission
+from core.admin import AccountableAdmin
+
 blocked = ['admin', 'auth', 'sessions', 'contenttypes', 'sites',]
 
-class PermissionAdmin(admin.ModelAdmin):
+class PermissionAdmin(AccountableAdmin):
     exclude = ('account',)
     filter_horizontal = ['permissions']
     
@@ -25,43 +27,6 @@ class PermissionAdmin(admin.ModelAdmin):
             kwargs["queryset"] = Permission.objects.filter(content_type__pk__gt=9)
             return db_field.formfield(**kwargs)
         return super(PermissionAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
-
-    
-    def save_model(self, request, obj, form, change):
-        if not change:
-            obj.account = request.account
-        obj.save()
-        
-    def queryset(self, request):
-        qs = super(PermissionAdmin, self).queryset(request)
-
-        # If super-user, show all comments
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(account=request.account)
-        
-    def has_add_permission(self, request):
-        if request.user.is_superuser:
-            return True
-        if request.user == request.account.owner:
-            return True
-        if not request.user in request.account.users.select_related():
-            return False
-        return False
-        
-    def has_change_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
-        if request.user == request.account.owner:
-            return True
-        return False
-        
-    def has_delete_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
-        if request.user == request.account.owner:
-            return True
-        return False
 
 admin.site.register(Account)
 admin.site.register(AccountUserPermission, PermissionAdmin)
