@@ -9,6 +9,8 @@ from core.admin import AccountableAdmin
 class BlogPostAdmin(AccountableAdmin):
     exclude = ('user', 'account')
     prepopulated_fields = {"slug": ("title",)}
+    list_filter = ('publish_date', 'status')
+
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if request.account is None:
             return super(BlogPostAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
