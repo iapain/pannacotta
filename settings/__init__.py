@@ -83,6 +83,7 @@ INSTALLED_APPS = (
 	'apps.accounts',
     'apps.tags',
     'apps.simplecomments', 
+    'apps.blogs',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
