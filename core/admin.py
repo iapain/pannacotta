@@ -3,6 +3,39 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 
 from apps.accounts.models import AccountUserPermission
+from utils.urls import content_media_urls, admin_url
+
+displayable_js = ["/static/js/jquery-1.4.4.min.js", "/static/js/keywords_field.js", '/static/js/collapse_backport.js']
+
+class DisplayableAdmin(admin.ModelAdmin):
+    """
+    Admin class for subclasses of the abstract ``Displayable`` model.
+    """
+
+    class Media:
+        js = displayable_js
+
+    list_display = ("title", "status",)
+    list_display_links = ("title",)
+    list_editable = ("status",)
+    list_filter = ("status",)
+    search_fields = ("title", "content",)
+    date_hierarchy = "publish_date"
+    radio_fields = {"status": admin.HORIZONTAL}
+    fieldsets = (
+        (None, {"fields": ["title", "status",
+            ("publish_date", "expiry_date"), ]}),
+        (_("Meta data"), {"fields": ("slug", "description"),
+            "classes": ("collapse-closed",)},),
+    )
+
+    def save_model(self, request, obj, form, change):
+        """
+        Store the keywords as a single string into the ``_keywords`` field
+        for convenient access when searching.
+        """
+        obj = form.save(commit=True)
+        #obj.set_searchable_keywords()
 
 class AccountableAdmin(admin.ModelAdmin):
     """
