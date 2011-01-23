@@ -4,6 +4,7 @@ from django.contrib.sites.models import Site
 from django.template import TemplateDoesNotExist
 
 from apps.dbtemplates.models import Template, backend
+from core.middleware import get_current_request
 
 def load_template_source(template_name, template_dirs=None):
     """
@@ -22,7 +23,11 @@ def load_template_source(template_name, template_dirs=None):
             "use `dbtemplates.loader.Loader` instead.",
             PendingDeprecationWarning
         )
-    site = Site.objects.get_current()
+    request = get_current_request()
+    if request.account:
+        site = request.account.site
+    else:
+        site = Site.objects.get_current()
     display_name = 'db:%s:%s:%s' % (settings.DATABASE_ENGINE,
                                     template_name, site.domain)
     if backend:
@@ -33,7 +38,7 @@ def load_template_source(template_name, template_dirs=None):
         except:
             pass
     try:
-        template = Template.on_site.get(name__exact=template_name)
+        template = Template.objects.get(name__exact=template_name, account=request.account)
         # Save in cache backend explicitly if manually deleted or invalidated
         if backend:
             backend.save(template_name, template.content)

@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
 from apps.pages.models import Page, ContentPage
+from apps.dbtemplates.models import Template
 from core.admin import DisplayableAdmin, AccountableAdmin
 from utils.urls import admin_url
 
@@ -20,7 +21,7 @@ class PageAdmin(DisplayableAdmin, AccountableAdmin):
     redirections between admin interfaces for the ``Page`` model and its
     subclasses.
     """
-
+    prepopulated_fields = {'slug': ('title',)}
     fieldsets = page_fieldsets
 
     def in_menu(self):
@@ -111,6 +112,14 @@ class ContentPageAdmin(PageAdmin):
     Admin class for the ContentPage default content type.
     """
     fieldsets = content_page_fieldsets
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if request.account is None:
+            return super(ContentPageAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == "template":
+            kwargs["queryset"] = Template.objects.filter(account=request.account)
+            return db_field.formfield(**kwargs)
+        return super(ContentPageAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 admin.site.register(Page, PageAdmin)

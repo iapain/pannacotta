@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
+from django.conf import settings
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -16,3 +17,9 @@ urlpatterns = patterns('',
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': 'static/'}),
 )
+
+# Pages app.
+if "apps.pages" in settings.INSTALLED_APPS:
+    urlpatterns += patterns("",
+        ("^", include("apps.pages.urls")),
+    )
